@@ -74,27 +74,54 @@ def read_xlsx(path):
 def read_video(path):
     info = {"tipo": "video", "archivo": path.name}
     try:
-        import subprocess
-        result = subprocess.run(
+        import subprocess, tempfile, glob
+        probe = subprocess.run(
             ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", "-show_streams", str(path)],
             capture_output=True, text=True, timeout=30
         )
-        if result.returncode == 0:
-            data = json.loads(result.stdout)
+        if probe.returncode == 0:
+            data = json.loads(probe.stdout)
             fmt = data.get("format", {})
-            info["duracion"] = f"{float(fmt.get('duration', 0)):.1f}s"
+            duration = float(fmt.get("duration", 0))
+            info["duracion"] = f"{duration:.1f}s"
             info["tamano"] = sizeof_fmt(int(fmt.get("size", 0)))
             info["codec"] = fmt.get("format_name", "")
             streams = data.get("streams", [])
             for s in streams:
                 if s.get("codec_type") == "video":
                     info["resolucion"] = f"{s.get('width','?')}x{s.get('height','?')}"
-                    info["fps"] = s.get("r_frame_rate", "")
+                    fps_str = s.get("r_frame_rate", "")
+                    info["fps"] = fps_str
                     break
+            # extract frames + OCR
+            if duration > 0:
+                interval = max(1, duration / min(10, max(1, duration)))
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    frame_pattern = str(Path(tmpdir) / "frame_%03d.jpg")
+                    subprocess.run(
+                        ["ffmpeg", "-i", str(path), "-vf", f"fps=1/{interval},scale=1920:-1",
+                         "-q:v", "5", "-y", frame_pattern],
+                        capture_output=True, text=True, timeout=120
+                    )
+                    frames_text = []
+                    for f in sorted(glob.glob(str(Path(tmpdir) / "frame_*.jpg"))):
+                        try:
+                            from PIL import Image
+                            import pytesseract
+                            img = Image.open(f)
+                            text = pytesseract.image_to_string(img, lang="spa+eng").strip()
+                            if text:
+                                frames_text.append(text[:500])
+                        except:
+                            pass
+                    if frames_text:
+                        info["texto_fotogramas"] = frames_text[:5]
+                        if len(frames_text) > 5:
+                            info["texto_fotogramas"].append(f"(+ {len(frames_text)-5} fotogramas mas con texto)")
         else:
             info["error"] = "ffprobe no disponible"
-    except:
-        info["error"] = "ffprobe no instalado"
+    except Exception as e:
+        info["error_video"] = str(e)
     return info
 
 def read_text(path):
