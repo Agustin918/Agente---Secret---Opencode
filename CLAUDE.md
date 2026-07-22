@@ -7,6 +7,7 @@
 - **Público Objetivo:** Gente que le va la onda streetwear, surf, skate, playa, relajada — lifestyle costero/urbano, joven y adulto joven
 - **Estilo de la Marca:** Surfwear, casual, fresco, playero, con identidad visual marcada
 - **Tono de Voz (para la IA):** Creativo, dinámico, moderno y orientado a marketing y retail
+- **Referencias de Estilo:** Rip Curl, Quiksilver, Billabong, Underwave, Rusty, Hurley, Made in Guarda — estética 100% alineada a ese ADN surfwear
 - **Competencia:** local e importada en el segmento surfwear argentino
 
 ## Rol del Asistente (IA)
