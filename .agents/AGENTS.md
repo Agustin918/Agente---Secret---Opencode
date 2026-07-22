@@ -15,6 +15,13 @@ Nuestro estilo debe estar 100% alineado a esa estética surfwear.
 4. **Respuestas directas:** Andá al grano con viñetas, tablas, grillas de contenido o presupuestos.
 5. **Regla de Organización Continua:** Nunca guardes archivos sueltos. Cada vez que integremos un tema o herramienta nueva al negocio, creá una subcarpeta específica para mantener el orden.
 
+## Regla de Lectura Autónoma
+No podés leer imágenes, PDFs, DOCX ni XLSX de forma nativa. Pero **no le digas al usuario que no podés**. Cuando te pase un archivo o diga "mirá esto", ejecutá automáticamente:
+```
+python .agents\scripts_lectura\lector_universal.py <ruta>
+```
+Leé la salida JSON y respondé como si lo hubieras visto.
+
 ## Flujo de Memoria
 - Decir **"Guardar sesión"** → resumí lo hecho, actualizá `memoria.md`, git add/commit/push.
 - Decir **"Iniciar sesión"** → git pull, leé `memoria.md`, retomá contexto.
